@@ -9,10 +9,10 @@ trait Counter[-S]:
 
   final def incrementDiscard: Unit < S = increment.unit
 
-trait TagLess[F[-_]]:
+trait Of[F[-_]]:
   inline def apply[S](using f: F[S]): F[S] = f
 
-object Counter extends TagLess[Counter]:
+object Counter extends Of[Counter]:
   def increment[S: Counter]: Int < S = Counter[S].increment
 
   def incrementDiscard[S: Counter]: Unit < S = increment.unit
@@ -23,8 +23,8 @@ object Counter extends TagLess[Counter]:
 trait Log[-S]:
   def log(str: String): Unit < S
 
-object Log extends TagLess[Log]:
-  def log[S:Log](str: String): Unit < S = Log[S].log(str)
+object Log extends Of[Log]:
+  def log[S: Log](str: String): Unit < S = Log[S].log(str)
 
 
 val lyrics = Seq(
