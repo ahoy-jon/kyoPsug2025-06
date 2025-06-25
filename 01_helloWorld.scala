@@ -1,7 +1,7 @@
 package helloWorld
 
 import java.io.IOException
-import kyo.*
+import kyo.* // https://getkyo.io/#/
 
 val init: Unit < Sync = Console.printLine("Hello!")
 
@@ -47,8 +47,6 @@ object HelloWorld extends KyoApp:
   run:
     program_3
 
-
-
 //Merci Valentin ! https://github.com/vil1/pointless, cela donne envie de faire kyo-pointless
 extension [A, S](v: A < S)
-  infix def >>> [B, S2](f: A => B < S2): B < (S & S2) = v.map(f)
+  infix def >>>[B, S2](f: A => B < S2): B < (S & S2) = v.map(f)

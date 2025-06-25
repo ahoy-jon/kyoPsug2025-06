@@ -11,5 +11,3 @@
 //> using option -Wnonunit-statement
 //> using option -Wconf:msg=(unused.*value|discarded.*value|pure.*statement):error
 //> using option -language:strictEquality
-
-
