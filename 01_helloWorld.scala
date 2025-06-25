@@ -3,6 +3,8 @@ package helloWorld
 
 import kyo.*
 
+import java.io.IOException
+
 val init =
   Console.printLine("Hello!")
 
@@ -25,7 +27,7 @@ val program_for_comprehension =
     name <- WHAT_IS_YOUR_NAME
   yield hello(name)
 
-val program_single_line =
+val program_single_line: Unit < (Sync & Abort[IOException]) =
   init.andThen(WHAT_IS_YOUR_NAME).map(hello)
 
 val program_direct =
@@ -42,7 +44,3 @@ val program_point_free =
 object HelloWorld extends KyoApp:
   run:
     program_direct
-
-//Merci Valentin ! https://github.com/vil1/pointless, cela donne envie de faire kyo-pointless
-extension [A, S](v: A < S)
-  infix def >>>[B, S2](f: A => B < S2): B < (S & S2) = v.map(f)
