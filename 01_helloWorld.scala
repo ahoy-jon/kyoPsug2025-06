@@ -1,51 +1,47 @@
 package helloWorld
+// https://getkyo.io/#/
 
-import java.io.IOException
-import kyo.* // https://getkyo.io/#/
+import kyo.*
 
-val init: Unit < Sync = Console.printLine("Hello!")
+val init =
+  Console.printLine("Hello!")
 
-val WHAT_IS_YOUR_NAME: String < (Sync & Abort[IOException]) =
-  Console.print("Please type your name? > ").andThen(Console.readLine)
+val WHAT_IS_YOUR_NAME =
+  Console.print("Please type your name? > ") *> Console.readLine
 
-def hello(name: String): Unit < Sync =
+def hello(name: String) =
   Console.printLine(s"--- AHOY ${name.toUpperCase}! ---")
 
 //--- --- --- ---
 
-// map map map
-val program_0: Unit < (Sync & Abort[IOException]) =
+val program_map_map =
   init.map: Unit =>
     WHAT_IS_YOUR_NAME.map: name =>
       hello(name)
 
-// for-comp
-val program_1 =
+val program_for_comprehension =
   for
     _    <- init
     name <- WHAT_IS_YOUR_NAME
   yield hello(name)
 
-// single line
-val program_2 =
+val program_single_line =
   init.andThen(WHAT_IS_YOUR_NAME).map(hello)
 
-// direct-syntax
-val program_3 =
+val program_direct =
   direct:
     init.now
     val name = WHAT_IS_YOUR_NAME.now
     hello(name).now
 
-// point free?
-val program_4 =
+val program_point_free =
   init *> WHAT_IS_YOUR_NAME >>> hello
 
 //--- --- --- ---
 
 object HelloWorld extends KyoApp:
   run:
-    program_3
+    program_direct
 
 //Merci Valentin ! https://github.com/vil1/pointless, cela donne envie de faire kyo-pointless
 extension [A, S](v: A < S)
