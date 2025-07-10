@@ -22,7 +22,6 @@ opaque type Log = Sync
 
 object Log:
   def log(str: String): Unit < Log = Console.printLine(str)
-
   def run[A, S](v: A < (Log & S)): A < (Sync & S) = v
 end Log
 

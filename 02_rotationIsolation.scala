@@ -63,9 +63,9 @@ val prgVarChoice: String < (Choice & Var[State]) =
 
 end prgVarChoice
 
-def run(v: Any < Any):Unit = v.eval match
-  case _:Unit =>
-  case x => println(s"exit: $x")
+def run(v: Any < Any): Unit = v.eval match
+  case _: Unit =>
+  case x       => println(s"exit: $x")
 
 @main def choice(): Unit =
   run:
@@ -113,7 +113,7 @@ end doSomethingWith
 
 type Context = Var[State] & Abort[Error]
 
-def prg(isolate: Isolate.Stateful[Context, Context]): Unit < (Var[State]) =
+def prg(isolate: Isolate[Context, Context, Context]): Unit < (Var[State]) =
 
   def proc(str: String): Unit < (Var[State]) =
     doSomethingWith(str).handle(
@@ -134,15 +134,16 @@ def prg(isolate: Isolate.Stateful[Context, Context]): Unit < (Var[State]) =
 
 end prg
 
-def noIsolation[S]: Isolate.Stateful[S, S] = new Isolate.Stateful[S, S]:
+def noIsolation[S0]: Isolate[S0, S0, S0] = new Isolate[S0, S0, S0]:
   type State        = Unit
   type Transform[A] = A
 
-  override def capture[A, S1](f: Unit => A < S1)(using Frame): A < (S1 & S) = f(())
+  override def capture[A, S](f: Unit => A < S)(using Frame): A < (S & S0) = f(())
 
-  override def restore[A, S1](v: A < S1)(using Frame): A < (S1 & S) = v
+  override def restore[A, S](v: A < S)(using Frame): A < (S & S0) = v
 
-  override def isolate[A, S1](state: Unit, v: A < (S1 & S))(using Frame): A < (S1 & S) = v
+  override def isolate[A, S](state: Unit, v: A < (S & S0) )(using Frame) = v
+
 
 def eval(v: Unit < (Var[State] & Abort[Nothing])): Unit =
   v.handle(
@@ -170,15 +171,16 @@ def eval(v: Unit < (Var[State] & Abort[Nothing])): Unit =
     prg(noIsolation).handle(logCompact)
 
 def logCompact[A, S](v: A < (S & Var[State])) =
-  ArrowEffect.tap(Tag[Var[State]], v)(
+  ArrowEffect.wireTap(Tag[Var[State]], v)(
     mapInput = [C] => input => input,
-    mapOutput = [C] => (input, output) =>
-      //Abort.panic(new Exception("yolo")) *>
-      output.debugValue.map(_.distinctKeepLast.debugValue)
+    mapOutput = [C] =>
+      (input, output) =>
+        // Abort.panic(new Exception("yolo")) *>
+        output.debugValue.map(_.distinctKeepLast.debugValue)
   )
 
-def discardVarOnError(discard: Error => Boolean): Isolate.Stateful[Context, Any] =
-  new Isolate.Stateful[Context, Any]:
+def discardVarOnError(discard: Error => Boolean): Isolate[Context, Any, Context] =
+  new Isolate[Context, Any, Context]:
     type State        = rotationIsolation.State
     type Transform[A] = (State, Result[Error, A])
 
@@ -195,4 +197,3 @@ def discardVarOnError(discard: Error => Boolean): Isolate.Stateful[Context, Any]
       v.map: (state, result) =>
         val discardVar: Boolean = result.fold(_ => false, discard, _ => false)
         Var.set(state).when(!discardVar) *> Abort.get(result)
-

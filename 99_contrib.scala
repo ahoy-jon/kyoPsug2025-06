@@ -11,7 +11,7 @@ extension [A, S](v: A < S)
 
 extension (arrowEffect: ArrowEffect.type)
   // --- --- ---
-  inline def tap[I[_], O[_], E <: ArrowEffect[I, O], A, S, S2](
+  inline def wireTap[I[_], O[_], E <: ArrowEffect[I, O], A, S, S2](
                                                                 inline effectTag: Tag[E],
                                                                 v: A < (E & S)
                                                               )(
@@ -29,5 +29,5 @@ extension (arrowEffect: ArrowEffect.type)
               mapOutput[C](originalInput, o).map: o =>
                 Loop.continue:
                   cont(o)
-  end tap
+  end wireTap
 end extension
